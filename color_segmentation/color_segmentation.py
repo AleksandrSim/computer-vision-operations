@@ -73,7 +73,7 @@ def segment_colors_histogram_threshold(all_the_positions, original_image_positio
 
 
 if __name__=='__main__':
-    original_image = np.array(Image.open('gun1.bmp'))
+    original_image = np.array(Image.open('baby.jpg'))
     image = rgb2hsv(original_image)
     extract_colors(original_image)
     length, width = len(image), len(image[0])
