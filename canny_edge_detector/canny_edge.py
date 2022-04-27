@@ -2,7 +2,8 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import math
-
+import os
+import cv2
 
 def convert_to_gray(image, red=0.2989, green=0.5870, blue=0.1140):
     target = [[0] * len(image[0]) for i in range(len(image))]
@@ -106,22 +107,27 @@ def threshold(img, lowThreshold=0.06, highThreshold=0.11):
     return new_image
 
 
+
 def edge_linking(img, weak=25, strong=255):
     length, width = len(img), len(img[0])
     for i in range(1, length):
         for j in range(1, width):
             if (img[i,j] == weak):
-                    if ((img[i+1, j-1] == strong) or (img[i+1, j] == strong) or (img[i+1, j+1] == strong)
-                        or (img[i, j-1] == strong) or (img[i, j+1] == strong)
-                        or (img[i-1, j-1] == strong) or (img[i-1, j] == strong) or (img[i-1, j+1] == strong)):
-                        img[i, j] = strong
-                    else:
-                        img[i, j] = 0
+                breaker =False
+                for upper in range(-1,2):
+                    if breaker == True:
+                        break
+                    for horiz in range(-1,2):
+                        if (img[i+upper, j+horiz])== strong:
+                            braker = True
+                            img[i,j]= strong
+                            break
+                if img[i,j]!= strong:
+                    img[i][j] =0
+
 
     return img
-
-def non_max_suppression(img, D, method='interpolation'):
-    assert method == 'interpolation', 'for non_max_suppression, I have used the angle values that I got from gradient step, please specify interpolation method'
+def non_max_suppression(img, D):
     length, width = len(img), len(img[0])
     new_image = np.zeros((length, width), dtype=np.int32)
     angle = D * 180. / np.pi
@@ -130,7 +136,6 @@ def non_max_suppression(img, D, method='interpolation'):
     for i in range(1, length - 1):
         for j in range(1, width - 1):
             prev, after = 255, 255
-
             if (0 <= angle[i, j] < 22.5) or (157.5 <= angle[i, j] <= 180):
                 prev = img[i, j + 1]
                 after = img[i, j - 1]
@@ -157,22 +162,34 @@ def show(values):
 
 
 if __name__=='__main__':
-    image = np.array(Image.open('lena.bmp'))
+
+    image_name = 'test1.bmp'
+    if not os.path.isdir(image_name[:-4]):
+        os.mkdir(image_name[:-4])
+    image = np.array(Image.open(image_name))
     show(image)
     image = np.array(convert_to_gray(image))
 
     gaussian_image = filter_image(image, kernel_size=3, sigm=0.4)
+    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_gaussian.jpg', gaussian_image)
     show(gaussian_image)
     new_image, theta = filter_image_sobel(gaussian_image)
+    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_gradient.jpg',  new_image)
     show(new_image)
     plt.hist(new_image.reshape(len(new_image[0])* len(new_image)), cumulative=True)
     plt.show()
     image_non_max = non_max_suppression(new_image, theta)
+    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_non_max_suppression.jpg', image_non_max)
+
     show(image_non_max)
-    new_img = threshold(image_non_max,lowThreshold=0.09, highThreshold=0.14)
+    new_img = threshold(image_non_max,lowThreshold=0.04, highThreshold=0.1)
+    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_threshold.jpg', new_img)
+
     show(new_img)
     plt.imshow(edge_linking(new_img, weak =25), cmap='gray', vmin=0, vmax=255)
     plt.show()
+    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_edge_linking.jpg', new_img)
+
 
 
 
