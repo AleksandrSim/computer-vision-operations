@@ -3,7 +3,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import math
 import os
-import cv2
+
 
 def convert_to_gray(image, red=0.2989, green=0.5870, blue=0.1140):
     target = [[0] * len(image[0]) for i in range(len(image))]
@@ -171,24 +171,21 @@ if __name__=='__main__':
     image = np.array(convert_to_gray(image))
 
     gaussian_image = filter_image(image, kernel_size=3, sigm=0.4)
-    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_gaussian.jpg', gaussian_image)
+
     show(gaussian_image)
     new_image, theta = filter_image_sobel(gaussian_image)
-    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_gradient.jpg',  new_image)
     show(new_image)
     plt.hist(new_image.reshape(len(new_image[0])* len(new_image)), cumulative=True)
     plt.show()
     image_non_max = non_max_suppression(new_image, theta)
-    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_non_max_suppression.jpg', image_non_max)
 
     show(image_non_max)
     new_img = threshold(image_non_max,lowThreshold=0.04, highThreshold=0.1)
-    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_threshold.jpg', new_img)
 
     show(new_img)
     plt.imshow(edge_linking(new_img, weak =25), cmap='gray', vmin=0, vmax=255)
     plt.show()
-    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_edge_linking.jpg', new_img)
+
 
 
 
