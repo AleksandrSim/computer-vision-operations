@@ -15,7 +15,7 @@ def convert_to_gray(image, red=0.2989, green=0.5870, blue=0.1140):
 def normalize_data(data):
     return (data - np.min(data)) / (np.max(data) - np.min(data))
 
-def generate_kernel(size=5, sig=3, n=1):
+def generate_kernel(size=5, sig=3):
     if size % 2 == 0:
         size += 1
     raw_kernel = np.array([[0] * size for i in range(size)], dtype="float32")
@@ -57,22 +57,16 @@ def filter_image(image, kernel_size=3, sigm=0.4):
 
 def filter_image_sobel(image):
     center = 1
-
     length, width = len(image), len(image[0])
     image = np.pad(image, pad_width=1)
-
     x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], np.float32)
     y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], np.float32)
     new_image_X = np.zeros((length,width))
     new_image_Y =np.zeros((length,width))
-
     new_image = np.zeros((length,width))
     for row in range(1, length+1):
         for column in range(1, width+1):
-            #           new_image_X[row-center,column-center]= np.sum(np.dot(x, image[row-1:row+2, column-1:column+2]))
-            #           new_image_Y[row-center,column-center]= np.sum(np.dot(image[row-1:row+2, column-1:column+2],y, ))
             new_image_X[row - center, column - center] = np.sum(image[row - 1:row + 2, column - 1:column + 2] * x)
-
             new_image_Y[row - center, column - center] = np.sum(image[row - 1:row + 2, column - 1:column + 2] * y)
             new_image[row - center, column - center] = np.sqrt(
                 new_image_X[row - center, column - center] ** 2 + new_image_Y[row - center, column - center] ** 2)
@@ -132,7 +126,6 @@ def non_max_suppression(img, D):
     new_image = np.zeros((length, width), dtype=np.int32)
     angle = D * 180. / np.pi
     angle[angle < 0] += 180
-
     for i in range(1, length - 1):
         for j in range(1, width - 1):
             prev, after = 255, 255
@@ -152,7 +145,6 @@ def non_max_suppression(img, D):
             if (img[i, j] >= prev) and (img[i, j] >= after):
                 new_image[i, j] = img[i, j]
             else:
-
                 new_image[i, j] = 0
 
     return new_image
@@ -163,23 +155,26 @@ def show(values):
 
 if __name__=='__main__':
 
-    image_name = 'test1.bmp'
+    image_name = 'lena.bmp'
     if not os.path.isdir(image_name[:-4]):
         os.mkdir(image_name[:-4])
     image = np.array(Image.open(image_name))
     show(image)
     image = np.array(convert_to_gray(image))
 
-    gaussian_image = filter_image(image, kernel_size=3, sigm=0.4)
+    gaussian_image = filter_image(image, kernel_size=3, sigm=0.8)
+    gaussian_image = filter_image(image, kernel_size=3, sigm=0.8)
 
     show(gaussian_image)
     new_image, theta = filter_image_sobel(gaussian_image)
     show(new_image)
-    plt.hist(new_image.reshape(len(new_image[0])* len(new_image)), cumulative=True)
-    plt.show()
-    image_non_max = non_max_suppression(new_image, theta)
 
+    image_non_max = non_max_suppression(new_image, theta)
     show(image_non_max)
+    reshaped = image_non_max.reshape(len(image_non_max[0]) * len(image_non_max))
+    reshaped= reshaped[reshaped>0]
+    plt.hist(reshaped,cumulative=True,bins=20)
+    plt.show()
     new_img = threshold(image_non_max,lowThreshold=0.04, highThreshold=0.1)
 
     show(new_img)

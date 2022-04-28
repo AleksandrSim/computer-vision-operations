@@ -103,7 +103,6 @@ if __name__=='__main__':
     plt.show()
     plot_hist(acc)
     image = get_lines(acc, Image.open(image_name), num_rho_param,DIST_RES,ANG_RES, width,  threshold=40)
-    cv2.imwrite(image_name[:-4] + '/'+ image_name[:4]+'_hough_transform.jpg',  image)
 
 
 
