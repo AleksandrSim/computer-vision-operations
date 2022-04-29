@@ -59,15 +59,14 @@ def show(values):
 
 def plot_hist(acc):
     new= acc.reshape(len(acc[0])*len(acc))
-    plt.hist(new[new>0])
+    plt.hist(new[new>20])
     plt.show()
 
 
 
-def get_lines(acc, img, num_rho_param,distance_resolution, angle_resolution, width, threshold = 40):
+def get_lines(acc, img, num_rho_param,distance_resolution, angle_resolution, width, threshold):
     acc[acc<threshold]=0
     distances = 3
-    img_array = np.array(img)
     locations = peak_local_max(acc, min_distance=distances)
     locations = locations[:5:]
     for rho_index, theta_index in locations:
@@ -89,14 +88,15 @@ def get_lines(acc, img, num_rho_param,distance_resolution, angle_resolution, wid
 if __name__=='__main__':
     DIST_RES = 0.5
     ANG_RES = math.pi/180/6
-    THRESHOLD = 60
-    image_name = 'input.bmp'
+    image_name = 'test2.bmp'
     if not os.path.isdir(image_name[:-4]):
         os.mkdir(image_name[:-4])
     image = np.array(Image.open(image_name))
     heigth, width= len(image), len(image[0])
     image_gray = np.array(convert_to_gray(image))
-    edges = cv2.Canny(image, 50, 200, apertureSize=3)
+    edges = cv2.Canny(image, 50, 210, apertureSize=3)
+    plt.imshow(edges)
+    plt.show()
 
     acc,num_rho_param =accamulator_vectorized(edges, math.pi/180/6,0.5)
     plt.imshow(acc, cmap='viridis')
