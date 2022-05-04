@@ -88,7 +88,7 @@ def get_lines(acc, img, num_rho_param,distance_resolution, angle_resolution, wid
 if __name__=='__main__':
     DIST_RES = 0.5
     ANG_RES = math.pi/180/6
-    image_name = 'test2.bmp'
+    image_name = 'input.bmp'
     if not os.path.isdir(image_name[:-4]):
         os.mkdir(image_name[:-4])
     image = np.array(Image.open(image_name))
